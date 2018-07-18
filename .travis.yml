@@ -22,7 +22,7 @@ addons:
       - git
       - ccache
 
-install: pip install --user -r requirements.txt
+install: pip install -r requirements.txt
 
 before_install:
 
