@@ -1,5 +1,5 @@
 language: python
-python: 3.4
+python: 3.6
 cache:
   - pip
   - ccache
@@ -20,13 +20,9 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - git
-      - python3
-      - python3-numpy
-      - python3-pip
       - ccache
 
-install:
-  - sudo pip3 install -r requirements.txt
+install: pip install --user -r requirements.txt
 
 before_install:
 
