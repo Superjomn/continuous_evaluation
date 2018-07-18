@@ -16,4 +16,12 @@ kpi1 = LessWorseKpi(
     short_description='This kpi should failed',
     description='some long description')
 
-tracking_kpis = [kpi0, kpi1]
+kpi_to_update = LessWorseKpi(
+    name='kpi_to_update',
+    actived=True,
+    threshold=0.01,
+    unit_repr='qps',
+    short_description='short desc',
+    description='long desc', )
+
+tracking_kpis = [kpi0, kpi1, kpi_to_update]
