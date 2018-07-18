@@ -58,6 +58,7 @@ class MainUnittest(unittest.TestCase):
         self.assertTrue(info.passed)
         self.assertEqual(info.unit, 'qps')
         self.assertTrue(info.actived)
+        self.assertEqual(info.value, 0.3)
 
         self.assertEqual(dv.KpiBaseline.get('demo0', 'kpi0'), 0.11)
         self.assertEqual(dv.KpiBaseline.get('demo0', 'kpi1'), 0.23)
