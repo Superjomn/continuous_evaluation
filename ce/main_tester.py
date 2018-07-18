@@ -21,7 +21,7 @@ class MainUnittest(unittest.TestCase):
     def test_add_record(self):
         config_path = os.path.join(os.getcwd(), '../ce/default.conf')
         logs = __(
-            'python main.py --config %s --is_test 1 --workspace ../test_env' %
+            'python3 main.py --config %s --is_test 1 --workspace ../test_env' %
             config_path)
         log.info('logs', logs)
         kpi = dv.shared_db.gets({}, table='kpi')
