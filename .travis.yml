@@ -1,15 +1,16 @@
 language: python
+python: 3.6
 cache:
   - pip
   - ccache
-  # - yarn
-  # - npm
 sudo: required
 dist: trusty
 
 os:
   - linux
-
+services:
+  - redis-server
+  - mongodb
 env:
   - JOB=test
 
@@ -19,19 +20,14 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - git
-      - python3
-      - python3-pip
       - ccache
-      - mongod
-      - redis-server
 
-install:
-  - sudo pip3 install -r requirements.txt
+install: pip install -r requirements.txt
 
 before_install:
 
 script:
-  - [[ "$JOB" == "test" ]] && /bin/bash ./test.sh
+  - if [[ "$JOB" == "test" ]]; then /bin/bash ./test.sh; fi
 
 notifications:
   email:
