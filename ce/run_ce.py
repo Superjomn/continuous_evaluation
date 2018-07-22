@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 This file contains all the commands.
 '''
@@ -119,6 +120,12 @@ def parse_args():
     arg.add_argument('--workspace', type=str, default='.')
     args = arg.parse_args()
 
+    print('config', args.config)
+
+    if not args.config:
+        print(arg.format_help())
+        os.exit(-1)
+
     # expose all the configs as environ for easier usage.
     Environ.set_workspace(args.workspace)
     Environ.set_test_mode(args.is_test)
@@ -141,7 +148,5 @@ def load_kpis(root, task_name):
 
 if __name__ == '__main__':
     args = parse_args()
-
-    Config.Global(args.config)
 
     evaluate_all_tasks()

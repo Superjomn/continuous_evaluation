@@ -7,11 +7,9 @@ from ce.environ import Environ
 from ce.repo import get_commit
 
 
-class MainUnittest(unittest.TestCase):
+class RunCEUnittest(unittest.TestCase):
     def setUp(self):
         Environ.set_config(os.path.join(os.getcwd(), 'default.conf'))
-        with local.cwd('../test_env'):
-            dv.init_shared_db(True)
 
         dv.KpiBaseline.update('demo0', 'kpi0', 0.11, 'original kpi0 baseline')
         dv.KpiBaseline.update('demo0', 'kpi1', 0.23, 'original kpi1 baseline')
@@ -21,12 +19,12 @@ class MainUnittest(unittest.TestCase):
     def test_add_record(self):
         config_path = os.path.join(os.getcwd(), '../ce/default.conf')
         logs = __(
-            'python3 main.py --config %s --is_test 1 --workspace ../test_env' %
-            config_path)
+            'python3 run_ce.py --config %s --is_test 1 --workspace ../test_env'
+            % config_path)
         log.info('logs', logs)
-        kpi = dv.shared_db.gets({}, table='kpi')
-        task = dv.shared_db.gets({}, table='task')
-        commit = dv.shared_db.gets({}, table='commit')
+        kpi = dv.DB.Instance().gets({}, table='kpi')
+        task = dv.DB.Instance().gets({}, table='task')
+        commit = dv.DB.Instance().gets({}, table='commit')
 
         log.info('kpis', kpi)
         log.info('tasks', task)
@@ -67,7 +65,7 @@ class MainUnittest(unittest.TestCase):
     def tearDown(self):
         log.warn('delete test db')
 
-        dv.shared_db.client.drop_database('test')
+        dv.DB.Instance().delete_db('test')
 
 
 if __name__ == '__main__':

@@ -7,8 +7,7 @@ from ce.environ import Environ
 
 class GreaterWorseKpiTester(unittest.TestCase):
     def setUp(self):
-        dv.init_shared_db(test=True)
-        dv.shared_db.client.drop_database('test')
+        dv.DB.Instance().delete_db('test')
         self.name = 'kpi0'
 
         self.kpi = GreaterWorseKpi(
@@ -42,13 +41,12 @@ class GreaterWorseKpiTester(unittest.TestCase):
         self.assertEqual(self.kpi.compare_with(cur, other), ratio)
 
     def tearDown(self):
-        dv.shared_db.client.drop_database('test')
+        dv.DB.Instance().delete_db('test')
 
 
 class LessWorseKpiTester(unittest.TestCase):
     def setUp(self):
-        dv.init_shared_db(test=True)
-        dv.shared_db.client.drop_database('test')
+        dv.DB.Instance().delete_db('test')
 
         self.kpi = LessWorseKpi(
             name='kpi0',
@@ -75,7 +73,7 @@ class LessWorseKpiTester(unittest.TestCase):
         self.assertEqual(self.kpi.compare_with(cur, other), ratio)
 
     def tearDown(self):
-        dv.shared_db.client.drop_database('test')
+        dv.DB.Instance().delete_db('test')
 
 
 if __name__ == '__main__':

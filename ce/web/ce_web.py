@@ -6,8 +6,8 @@ from ce.web.view import FakeView
 #from flask.ext.cache import Cache
 
 SERVER_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
-STATIC_DIR = os.path.join(SERVER_PATH, "html")
 TEMPLATE_DIR = os.path.join(SERVER_PATH, "html")
+STATIC_DIR = os.path.join(SERVER_PATH, "static")
 
 app = Flask(
     "paddle-ce", static_url_path=STATIC_DIR, template_folder=TEMPLATE_DIR)

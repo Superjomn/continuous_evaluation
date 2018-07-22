@@ -3,7 +3,7 @@ from ce.db_tester import *
 from ce.kpi_tester import *
 from ce.repo_tester import *
 from ce.utils_tester import *
-from ce.main_tester import *
+from ce.run_ce_tester import *
 
 import unittest
 

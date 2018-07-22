@@ -94,6 +94,9 @@ class MongoDB(object):
         search_key = {'key': key} if type(key) is str else key
         return self.table(table).delete_many(search_key)
 
+    def delete_db(self, name):
+        self.client.drop_database(name)
+
 
 class RedisDB(object):
     ''' An higher interface for the Redis database. '''

@@ -9,8 +9,6 @@ class KpiTester(unittest.TestCase):
         self.task = 'task0'
         self.name = 'kpi0'
 
-        dv.shared_db = None
-        dv.init_shared_db(test=True)
         self.kpi = dv.Kpi(commitid=self.commitid,
                           task=self.task,
                           name=self.name)
@@ -43,7 +41,7 @@ class KpiTester(unittest.TestCase):
 
     def tearDown(self):
         record_id = dv.Kpi.gen_record_id(self.commitid, self.task, self.name)
-        dv.shared_db.delete(record_id)
+        dv.DB.Instance().delete(record_id)
 
 
 class TaskTester(unittest.TestCase):
@@ -52,8 +50,6 @@ class TaskTester(unittest.TestCase):
         self.name = 'task0'
         self.kpi_ids = set()
 
-        dv.shared_db = None
-        dv.init_shared_db(test=True)
         self.kpi = []
         self.task = dv.Task(
             commitid=self.commitid, name=self.name, kpis=self.kpi)
@@ -90,14 +86,12 @@ class TaskTester(unittest.TestCase):
 
     def tearDown(self):
         log.warn('delete test database')
-        dv.shared_db.client.drop_database('test')
+        dv.DB.db.delete_db('test')
 
 
 class CommitTester(unittest.TestCase):
     def setUp(self):
         self.commitid = "xxsdfas0"
-        dv.shared_db = None
-        dv.init_shared_db(test=True)
 
         self.commit = dv.Commit(
             commitid=self.commitid, tasks=['task0', 'task1'])
@@ -106,16 +100,14 @@ class CommitTester(unittest.TestCase):
         self.commit.persist()
 
     def tearDown(self):
-        dv.shared_db.client.drop_database('test')
+        dv.DB.db.delete_db('test')
 
 
 class KpiBaselineTester(unittest.TestCase):
     def test_update(self):
-        dv.init_shared_db(True)
         dv.KpiBaseline.update('task0', 'kpi0', 1., 'first update')
 
     def test_get(self):
-        dv.init_shared_db(True)
         dv.KpiBaseline.update('task0', 'kpi0', 1., 'first update')
         dv.KpiBaseline.update('task0', 'kpi0', 2., 'first update')
         dv.KpiBaseline.update('task0', 'kpi0', 3., 'first update')
@@ -127,7 +119,7 @@ class KpiBaselineTester(unittest.TestCase):
         self.assertEqual(dv.KpiBaseline.get('task0', 'kpi1'), True)
 
     def tearDown(self):
-        dv.shared_db.client.drop_database('test')
+        dv.DB.db.delete_db('test')
 
 
 if __name__ == '__main__':

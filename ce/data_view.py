@@ -11,31 +11,22 @@ from ce.db import MongoDB
 from ce.environ import Environ
 
 
-class DB(MongoDB):
-    def __init__(self, test=False):
+class DB:
+    db = None
+
+    @staticmethod
+    def Instance():
         config = Config.Global(Environ.config())
-        super().__init__(
-            host=config.get('database', 'host'),
-            port=config.get_int('database', 'port'),
-            db=config.get('database', 'id'),
-            test=Environ.test_mode() if test is not None else test)
+        if not DB.db:
+            DB.db = MongoDB(
+                host=config.get('database', 'host'),
+                port=config.get_int('database', 'port'),
+                db=config.get('database', 'id'), )
+        return DB.db
 
-
-shared_db = DB()
 
 log.info = print
 log.warn = print
-
-
-def init_shared_db(test=None):
-    global shared_db
-    if not shared_db:
-        config = Config.Global()
-        shared_db = MongoDB(
-            host=config.get('database', 'host'),
-            port=config.get_int('database', 'port'),
-            db=config.get('database', 'id'),
-            test=Environ.test_mode() if test is not None else test)
 
 
 def parse_mongo_record(record):
@@ -80,14 +71,13 @@ class Commit(DataStruct):
         self.record_id = self.gen_record_id(commitid)
 
     def persist(self, update=False):
-        init_shared_db()
         message = json.dumps(self.data)
         if not update:
             log.info('persist', self.record_id, message)
-            assert shared_db.set(self.record_id, message, table='commit')
+            assert DB.Instance().set(self.record_id, message, table='commit')
         else:
             log.info('update', self.record_id, message)
-            shared_db.update(self.record_id, message, table='commit')
+            DB.Instance().update(self.record_id, message, table='commit')
         return self.record_id
 
     def fetch_info(self):
@@ -95,9 +85,7 @@ class Commit(DataStruct):
         Fetch the commit infomation.
         :return: self
         '''
-        init_shared_db()
-
-        message = shared_db.get(self.record_id, table='commit')
+        message = DB.Instance().get(self.record_id, table='commit')
         assert message, 'no record called %s' % self.record_id
         self.data = parse_mongo_record(message)
 
@@ -108,8 +96,8 @@ class Commit(DataStruct):
         assert self.data.tasks, 'fetch_info first'
         tasks = []
         for task in self.data.tasks:
-            info = shared_db.get(Task.gen_record_id(self.data.commitid, task),
-                                 table='task')
+            info = DB.Instance().get(
+                Task.gen_record_id(self.data.commitid, task), table='task')
             if info:
                 info = parse_mongo_record(info)
                 task = Task()
@@ -125,8 +113,7 @@ class Commit(DataStruct):
 
     @staticmethod
     def fetch_all():
-        init_shared_db()
-        infos = shared_db.gets({}, table='commit')
+        infos = DB.Instance().gets({}, table='commit')
         return [Commit(json.loads(info['value']))
                 for info in infos] if infos else []
 
@@ -153,15 +140,13 @@ class Task(DataStruct):
         return Task.gen_record_id(self.data.commitid, self.data.name)
 
     def persist(self):
-        init_shared_db()
         message = json.dumps(self.data)
         log.info('persist', self.record_id, message)
-        shared_db.set(self.record_id, message, table='task')
+        DB.Instance().set(self.record_id, message, table='task')
         return self.record_id
 
     def fetch_info(self):
-        init_shared_db()
-        info = shared_db.get(self.record_id, table='task')
+        info = DB.Instance().get(self.record_id, table='task')
         log.info('task info', info)
         assert info
         self.data = parse_mongo_record(info)
@@ -171,8 +156,6 @@ class Task(DataStruct):
         '''
         :return: list of KPI.
         '''
-        init_shared_db()
-
         assert self.data.kpis, "fetch_info first"
         kpi_ids = [
             Kpi.gen_record_id(self.data.commitid, self.data.name, kpi)
@@ -181,7 +164,7 @@ class Task(DataStruct):
         # TODO(Superjomn) search multiple records in one time.
         res = []
         for kpi_id in kpi_ids:
-            record = shared_db.get(kpi_id, table='kpi')
+            record = DB.Instance().get(kpi_id, table='kpi')
             if record:
                 kpi = Kpi(data=dictobj(json.loads(record['json'])))
                 res.append(kpi)
@@ -189,8 +172,7 @@ class Task(DataStruct):
 
     @staticmethod
     def fetch_all():
-        init_shared_db()
-        infos = shared_db.gets({}, table="task")
+        infos = DB.Instance().gets({}, table="task")
         return [Task(data=json.loads(info['json']))
                 for info in infos] if infos else []
 
@@ -269,7 +251,7 @@ class Kpi(DataStruct):
         self.data.value = val
 
     def fetch_infos(self):
-        data = shared_db.get(self.record_id, table='kpi')
+        data = DB.Instance().get(self.record_id, table='kpi')
         assert data, 'no KPI record which key is %s' % self.record_id
 
         self.data = dictobj(json.loads(data['json']))
@@ -280,7 +262,7 @@ class Kpi(DataStruct):
 
     @staticmethod
     def fetch_all():
-        infos = shared_db.gets({}, table="kpi")
+        infos = DB.Instance().gets({}, table="kpi")
         return [Kpi(info['json']) for info in infos] if infos else []
 
     @property
@@ -296,7 +278,7 @@ class Kpi(DataStruct):
                 self.data[key] = 1 if item else 0
         message = json.dumps(self.data)
         log.info('persist', self.record_id, message)
-        shared_db.set(self.record_id, message, table='kpi')
+        DB.Instance().set(self.record_id, message, table='kpi')
         return self.record_id
 
     @staticmethod
@@ -322,7 +304,7 @@ class KpiBaseline:
         __check_type__.match_str(task, kpi)
         key = '%s/%s' % (task, kpi)
         value = json.dumps({'kpi': value})
-        return shared_db.set(key, value, table='baseline')
+        return DB.Instance().set(key, value, table='baseline')
 
     @staticmethod
     def get(task, kpi):
@@ -334,7 +316,7 @@ class KpiBaseline:
         '''
         __check_type__.match_str(task, kpi)
         key = '%s/%s' % (task, kpi)
-        res = shared_db.get(key,
-                            table='baseline',
-                            sort=[('_id', pymongo.DESCENDING)])
+        res = DB.Instance().get(key,
+                                table='baseline',
+                                sort=[('_id', pymongo.DESCENDING)])
         return parse_mongo_record(res)['kpi'] if res else None
