@@ -4,6 +4,7 @@ This file contains all the commands.
 '''
 import argparse
 import os
+import sys
 
 import ce.data_view as dv
 from ce import repo
@@ -120,16 +121,15 @@ def parse_args():
     arg.add_argument('--workspace', type=str, default='.')
     args = arg.parse_args()
 
-    print('config', args.config)
-
     if not args.config:
         print(arg.format_help())
-        os.exit(-1)
+        sys.exit(-1)
 
     # expose all the configs as environ for easier usage.
     Environ.set_workspace(args.workspace)
     Environ.set_test_mode(args.is_test)
-    Environ.set_config(args.config)
+    Environ.set_config(
+        os.path.realpath(os.path.join(os.getcwd(), args.config)))
     return args
 
 
