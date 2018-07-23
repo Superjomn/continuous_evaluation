@@ -8,10 +8,12 @@ import sys
 
 import ce.data_view as dv
 from ce import repo
-from ce.config_util import Config
 from ce.environ import Environ
-from ce.utils import local, __
+from ce.utils import local, __, __check_type__
 from ce.utils import log
+
+log.info = print
+log.warn = print
 
 
 def evaluate_all_tasks():
@@ -58,7 +60,7 @@ def update_commit_status():
                 break
     state = 'passed' if suc else 'failed'
     commit = dv.Commit(commitid=Environ.commit())
-    dv.shared_db.update_fields(commit.record_id, {'state': state})
+    dv.DB.Instance().update_fields(commit.record_id, {'state': state})
 
 
 def evaluate_task(task_name):
@@ -67,6 +69,7 @@ def evaluate_task(task_name):
     :param task_name:
     :return: True for success, False for failure.
     '''
+    __check_type__.match_str(task_name)
     if '.' in task_name or task_name.startswith('__'):
         log.warn('skip path', task_name)
         return
@@ -87,10 +90,8 @@ def evaluate_task(task_name):
         log.info(logs)
         suc = True
 
-        tasks_root = os.path.abspath(
-            os.path.join(os.getcwd(), '../../test_env'))
-        print('tasks_root', tasks_root)
-        kpis = [kpi.name for kpi in load_kpis(tasks_root, task_name)]
+        print('tasks_root', Environ.workspace())
+        kpis = [kpi.name for kpi in load_kpis(Environ.workspace(), task_name)]
         task = dv.Task(commitid=Environ.commit(), name=task_name, kpis=kpis)
         task.persist()
 
@@ -122,7 +123,8 @@ def parse_args():
         sys.exit(-1)
 
     # expose all the configs as environ for easier usage.
-    Environ.set_workspace(args.workspace)
+    Environ.set_workspace(
+        os.path.realpath(os.path.join(os.getcwd(), args.workspace)))
     Environ.set_test_mode(args.is_test)
     Environ.set_config(
         os.path.realpath(os.path.join(os.getcwd(), args.config)))

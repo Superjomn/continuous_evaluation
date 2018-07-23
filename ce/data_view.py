@@ -25,10 +25,6 @@ class DB:
         return DB.db
 
 
-log.info = print
-log.warn = print
-
-
 def parse_mongo_record(record):
     '''
     Combine MongoDB record infomation with the JSON serialized dict.

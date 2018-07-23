@@ -20,9 +20,11 @@ class log:
     def warn(*args):
         log.logger().warning(' '.join([str(s) for s in args]))
 
+    @staticmethod
     def error(*args):
         log.logger().error(' '.join([str(s) for s in args]))
 
+    @staticmethod
     def debug(*args):
         log.logger().debug(' '.join([str(s) for s in args]))
 
