@@ -16,7 +16,7 @@ class DB:
 
     @staticmethod
     def Instance():
-        config = Config.Global(Environ.config())
+        config = Environ.config()
         if not DB.db:
             DB.db = MongoDB(
                 host=config.get('database', 'host'),

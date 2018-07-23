@@ -25,8 +25,7 @@ def evaluate_all_tasks():
 
         # Set a environment so that all the tasks can get the commit.
         Environ.set_commit(
-            repo.get_commit(
-                Config.Global(args.config).get('repo', 'local_path')))
+            repo.get_commit(Environ.config().get('repo', 'local_path')))
 
         commit = dv.Commit(
             commitid=Environ.commit(), tasks=tasks_to_evaluate())

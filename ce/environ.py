@@ -1,5 +1,6 @@
 import os
 from ce.utils import local
+from ce.config_util import Config
 
 
 class Environ(object):
@@ -18,7 +19,7 @@ class Environ(object):
 
     @staticmethod
     def config():
-        return env_setdefault('ce_config', 'default.conf')
+        return Config(env_setdefault('ce_config', 'default.conf'))
 
     @staticmethod
     def task():
