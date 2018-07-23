@@ -19,7 +19,7 @@ def read(file):
 VERSION_NUMBER = read('VERSION_NUMBER')
 
 install_requires = read('requirements.txt').split()
-execute_requires = ['git', 'mongod', 'redis-server']
+execute_requires = []
 
 
 def die(msg):

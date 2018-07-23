@@ -13,9 +13,6 @@ from ce.environ import Environ
 from ce.utils import local, __
 from ce.utils import log
 
-log.info = print
-log.warn = print
-
 
 def evaluate_all_tasks():
     '''
