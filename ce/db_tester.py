@@ -61,6 +61,7 @@ class MongoDBTester(unittest.TestCase):
         self.db.client.drop_database('test')
 
 
+'''
 class RedisDBTester(unittest.TestCase):
     def setUp(self):
         self.db = RedisDB(test=True)
@@ -75,9 +76,7 @@ class RedisDBTester(unittest.TestCase):
         self.assertEqual(res, None)
 
     def test_subscribe_publish(self):
-        '''
-        Test Redis subscribe and publish.
-        '''
+        # Test Redis subscribe and publish.
         p = self.db.new_subpub()
         p.subscribe('channel0')
         datas = ['hello', 'world']
@@ -90,7 +89,7 @@ class RedisDBTester(unittest.TestCase):
             message = p.get_message()
             self.assertEqual(message['type'], 'message')
             self.assertEqual(message['data'], datas[i])
-
+'''
 
 if __name__ == '__main__':
     unittest.main()

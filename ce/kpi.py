@@ -4,7 +4,7 @@ import numpy as np
 
 import ce.data_view as dv
 from ce.environ import Environ
-from ce.utils import log
+from ce.utils import log, __check_type__
 
 
 class Kpi(object):
@@ -23,6 +23,10 @@ class Kpi(object):
             The test will yield error if failed only if it is actived.
         unit_repr: the unit of the KPI, for train_duration, ms for example.
         desc: the description of this task. '''
+        __check_type__.match_str(name, unit_repr, short_description,
+                                 description)
+        __check_type__.match_bool(actived)
+        __check_type__.match_float(threshold, update_threshold)
         self.name = name
         self.actived = actived
         self.unit_repr = unit_repr
@@ -184,9 +188,49 @@ class LessWorseKpi(Kpi):
             return ratio > self.update_threshold
 
 
+class TrueAssertionKpi(Kpi):
+    def __init__(
+            self,
+            name,
+            actived=False,
+            short_description='',
+            description='', ):
+        super().__init__(
+            name=name,
+            actived=actived,
+            short_description=short_description,
+            description=description)
+
+    def evaluate(self):
+        return self.compare_with(self.cur_data, self.baseline_data)
+
+    def to_update_baseline(self):
+        '''
+        This Kpi's baseline is True, no need to store or update baseline.
+        :return: bool
+        '''
+        pass
+
+    @staticmethod
+    def compare_with(cur, other):
+        __check_type__.match_bool(cur, other)
+        return cur == other
+
+    @property
+    def cur_data(self):
+        assert len(
+            self.records) == 1, "TrueAssertionKpi can only take one record"
+        return self.records[0]
+
+    @property
+    def baseline_data(self):
+        return True
+
+
 CostKpi = GreaterWorseKpi
 DurationKpi = GreaterWorseKpi
 AccKpi = LessWorseKpi
 
 Kpi.__register__(GreaterWorseKpi)
 Kpi.__register__(LessWorseKpi)
+Kpi.__register__(TrueAssertionKpi)

@@ -1,7 +1,7 @@
 import os
 import unittest
 import ce.data_view as dv
-from ce.kpi import GreaterWorseKpi, LessWorseKpi
+from ce.kpi import GreaterWorseKpi, LessWorseKpi, TrueAssertionKpi
 from ce.environ import Environ
 
 
@@ -54,8 +54,9 @@ class LessWorseKpiTester(unittest.TestCase):
             threshold=0.01,
             unit_repr='cm',
             short_description='some desc', )
-        os.environ['commit'] = 'commit0'
-        os.environ['task'] = 'task0'
+
+        Environ.set_commit('commit0')
+        Environ.set_task('task0')
         self.name = 'kpi0'
 
         self.assertFalse(dv.KpiBaseline.get('task0', self.name))
@@ -74,6 +75,39 @@ class LessWorseKpiTester(unittest.TestCase):
 
     def tearDown(self):
         dv.DB.Instance().delete_db('test')
+
+
+class TrueAssertionKpiTester(unittest.TestCase):
+    def setUp(self):
+        dv.DB.Instance().delete_db('test')
+
+        self.kpi = TrueAssertionKpi(
+            name='true_kpi0',
+            actived=True,
+            short_description='some desc', )
+
+    def test_record_num(self):
+        # can only take one record
+        self.kpi.add_record(True)
+        self.kpi.add_record(False)
+
+        suc = True
+        try:
+            # should raise exception here.
+            self.kpi.evaluate()
+            suc = False
+        except:
+            self.assertEqual(len(self.kpi.records), 2)
+            pass
+        self.assertTrue(suc)
+
+    def test_evaluate(self):
+        self.kpi.add_record(True)
+        self.assertTrue(self.kpi.evaluate())
+
+    def test_evaluate_fail(self):
+        self.kpi.add_record(False)
+        self.assertFalse(self.kpi.evaluate())
 
 
 if __name__ == '__main__':
